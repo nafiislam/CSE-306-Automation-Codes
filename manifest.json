@@ -1,0 +1,30 @@
+{
+  "name": "MISP Checker",
+  "version": "0.1.0",
+  "description": "Saving timestamps in YT videos",
+  "permissions": ["storage", "tabs", "activeTab"],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.youtube.com/*"],
+      "js": ["contentScript.js"]
+    }
+  ],
+  "web_accessible_resources": [],
+  "action": {
+    "default_icon": {
+      "16": "Misp-logo.png",
+      "24": "Misp-logo.png",
+      "32": "Misp-logo.png"
+    },
+    "default_title": "MISP Checker",
+    "default_popup": "popup.html"
+  },
+  "manifest_version": 3
+}

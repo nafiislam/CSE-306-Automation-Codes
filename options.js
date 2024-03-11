@@ -1,31 +1,4 @@
-from pymisp import PyMISP
-
-# MISP configuration
-misp_url = 'https://localhost'
-misp_key = 'J0TcdxuP80xvj26sirZaqidaV7525QnQhmAGhXHY'
-verify_ssl = False  # Set to True if your MISP instance has a valid SSL certificate
-
-# Create a PyMISP instance
-misp = PyMISP(misp_url, misp_key, verify_ssl)
-
-
-def search_misp_attributes(type, value):
-    # Search for attributes in MISP
-    attributes = misp.search(controller='attributes', type_attribute=type, value=value)
-    if len(attributes['Attribute']) == 0:
-        print("No matching attributes found in MISP.")
-        return False
-
-    print("Attributes found:")
-    cnt = 1
-    for attribute in attributes['Attribute']:
-        print(str(cnt)+". Full details:")
-        print(attribute)
-        print(f"- Type: {attribute['type']}, Value: {attribute['value']}")
-        cnt += 1
-
-
-types_list = [
+const typesList = [
     "md5", "sha1", "sha256", "filename", "pdb", "filename|md5", "filename|sha1",
     "filename|sha256", "ip-src", "ip-dst", "hostname", "domain", "domain|ip",
     "email", "email-src", "eppn", "email-dst", "email-subject", "email-attachment",
@@ -69,12 +42,75 @@ types_list = [
     "boolean", "anonymised"
 ]
 
+const mispUrl = 'https://127.0.0.1/attributes/restSearch';
+const mispKey = 'J0TcdxuP80xvj26sirZaqidaV7525QnQhmAGhXHY';
+const verifySSL = false;  // Set to true if your MISP instance has a valid SSL certificate
+var taburl = ""; 
+async function searchMispAttributes(type, value) {
+    try {
+        const response = await fetch(mispUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': mispKey,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                value: value,
+                type: type,
+                returnFormat: 'json',
+            }),
+        });
 
-index = 1
-for t in types_list:
-    print(f'{index}. {t}')
-    index += 1
+        if (!response.ok) {
+            return (`<p>HTTP error! Status: ${response.status}</p>`);
+        }
 
-input_type = input("Enter the type of attribute to search for:")
-input_value = input("Enter the value to search for:")
-search_misp_attributes(input_type, input_value)
+        const data = await response.json();
+        const attributes = data.response.Attribute;
+
+        if (attributes.length === 0) {
+            return ('<p>No matching attributes found in MISP.</p>');
+        }
+
+        var returnString = "";
+
+        returnString+= '<p>Attributes found:</p>';
+        let cnt = 1;
+        for (const attribute of attributes) {
+            returnString += `<p><strong>${cnt}. Full details:</strong><br>`;
+            returnString += '<pre>'+JSON.stringify(attribute)+'</pre><br>';
+            returnString += `- Type: ${attribute.type}, Value: ${attribute.value}</p>`;
+            cnt += 1;
+        }
+
+        return returnString;
+    } catch (error) {
+        console.error('Error searching MISP attributes:', error.message);
+        return '<p>Error searching MISP attributes</p>';
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const selectElement = document.getElementById('typeSelect');
+
+    typesList.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.text = type;
+        selectElement.appendChild(option);
+    });
+
+    document.getElementById('saveButton').addEventListener('click', submitHandler);
+});
+
+async function submitHandler() {
+    const type = document.getElementById('typeSelect').value;
+    const value = document.getElementById('valueInput').value;
+
+    console.log("Button clicked");
+    console.log(type, value);
+
+    const res = await searchMispAttributes(type, value);
+    document.getElementById("result").innerHTML = res;
+}
