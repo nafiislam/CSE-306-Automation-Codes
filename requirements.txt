@@ -1,0 +1,5 @@
+urllib3
+python-dotenv
+pymisp
+watchdog
+tkinter
