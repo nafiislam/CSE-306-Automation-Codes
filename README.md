@@ -7,7 +7,7 @@ python3 file.py
 Installed MISP instance,pyMisp library, requests library
 
 ## Overall description of python files
-url.py:
+url.py
 
 It takes url input and checks it vulnerability using pyMISP.
 
